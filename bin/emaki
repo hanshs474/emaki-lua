@@ -1,0 +1,23 @@
+#!/usr/bin/env lua
+-- emaki "a prompt"                  -> clip URL (Seedance 2.5)
+-- emaki --image "a prompt"          -> image URL
+-- emaki --credits                   -> remaining credits
+local emaki = require("emaki")
+local a = arg[1]
+if a == "--credits" then
+  local n, err = emaki.credits()
+  if not n then io.stderr:write(err.reason .. ": " .. err.message .. "\n"); os.exit(err.reason == "auth" and 3 or 1) end
+  print(n); os.exit(0)
+end
+local image = a == "--image"
+local prompt = image and arg[2] or a
+if not prompt then
+  io.stderr:write('usage: emaki [--image] "prompt" | emaki --credits   (set EMAKI_API_KEY)\n')
+  os.exit(2)
+end
+local url, err = (image and emaki.generate_image or emaki.generate_video)(prompt)
+if not url then
+  io.stderr:write(err.reason .. ": " .. err.message .. "\n")
+  os.exit(err.reason == "auth" and 3 or 1)
+end
+print(url)

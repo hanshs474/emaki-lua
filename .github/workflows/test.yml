@@ -1,0 +1,11 @@
+name: test
+on: [push, workflow_dispatch]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq lua5.4 liblua5.4-dev luarocks libssl-dev
+      - run: for r in luasocket luasec dkjson; do sudo luarocks --lua-version=5.4 install $r; done
+      - run: lua5.4 spec/run.lua
+      - run: sudo luarocks --lua-version=5.4 make emaki-0.1.0-1.rockspec && (emaki 2>&1 | grep -q usage)
